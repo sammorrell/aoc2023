@@ -25,7 +25,7 @@ mod tests {
         }).sum();
 
         // Check the answer.
-        assert_eq!(answer, 142); 
+        assert_eq!(answer, 53080); 
     }
 
     #[test]
@@ -63,7 +63,7 @@ mod tests {
             }
 
             // Sort the digits and indices.
-            let sortidx = aoctk::vec::argsort(digit_indices.as_slice());
+            let sortidx = aoctk::sorting::argsort(digit_indices.as_slice());
             digits = sortidx.iter().map(|&idx| digits[idx]).collect();
             
             println!("Digits: {:?}", digits);
