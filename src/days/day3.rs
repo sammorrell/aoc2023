@@ -22,8 +22,7 @@ fn find_numbers_in_grid(grid: &Vec<Vec<char>>) -> HashMap<(usize, usize), u32> {
 mod tests {
 
     use std::path::Path;
-
-    use crate::days::day3::find_numbers_in_grid;
+    use super::find_numbers_in_grid;
 
     #[test]
     fn day3_part1() {
@@ -35,7 +34,7 @@ mod tests {
             let number_len = number.checked_ilog10().unwrap_or(0) + 1;
 
             let is_part_number = (0..number_len).map(|j_offset| {
-                let mut neighbours= aoctk::grid::GridNeighbours::get_neighborurs_for_coord(&schematic, coord.0, coord.1 + j_offset as usize);
+                let mut neighbours = aoctk::grid::GridNeighbours::get_neighbours_for_coord(&schematic, coord.0, coord.1 + j_offset as usize);
                 // Handle the case where the east / west cases are the other parts of the number.
                 if j_offset > 0 {
                     neighbours.w = None;
