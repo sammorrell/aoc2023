@@ -70,4 +70,27 @@ mod tests {
 
         assert_eq!(scores.iter().sum::<u32>(), 21158);
     }
+
+    #[test]
+    fn day4_part2() {
+        let cards = parse_cards_from_file(Path::new("data/day4/data.txt"));
+        let mut card_copies = vec![1; cards.len()];
+
+        let total_cards: Vec<usize> = cards
+            .iter()
+            .enumerate()
+            .map(|(start, card)| {
+                let winning_nums: HashSet<u32> =
+                    HashSet::from_iter(card.winning_numbers.iter().cloned());
+                let played_nums: HashSet<u32> = HashSet::from_iter(card.numbers.iter().cloned());
+                let n_matching = winning_nums.intersection(&played_nums).count();
+
+                for offset in 0..n_matching {
+                    card_copies[start + offset + 1] += card_copies[start]
+                }
+                card_copies[start]
+            }).collect();
+        
+        assert_eq!(total_cards.iter().sum::<usize>(), 6050769);
+    }
 }
