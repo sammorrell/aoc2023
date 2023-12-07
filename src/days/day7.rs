@@ -1,6 +1,7 @@
 use std::{cmp::Ordering, collections::HashMap};
 
 const INPUT: &str = include_str!("../../data/day7/data.txt");
+const TEST_INTPUT: &str = include_str!("../../data/day7/reddit.txt");
 
 const CHAR_ORDER: &str = "23456789TJQKA";
 const CHAR_ORDER_PT2: &str = "J23456789TQKA";
@@ -29,29 +30,45 @@ impl HandType {
         for character in input.chars() {
             char_occurances.insert(character, char_occurances.get(&character).unwrap_or(&0) + 1);
         }
+        
+        let mut char_occurances_vec = char_occurances.values().collect::<Vec<&u64>>();
+        char_occurances_vec.sort();
+        match char_occurances_vec.as_slice() {
+            [1, 1, 1, 1, 1] => HandType::HighCard(input.clone()),
+            [1, 1, 1, 2] => HandType::OnePair(input.clone()),
+            [1, 2, 2] => HandType::TwoPair(input.clone()),
+            [1, 1, 3] => HandType::ThreeOfAKind(input.clone()),
+            [2, 3] => HandType::FullHouse(input.clone()),
+            [1, 4] => HandType::FourOfAKind(input.clone()),
+            [5] => HandType::FiveOfAKind(input.clone()),
+            _ => { 
+                println!("{:?}", char_occurances_vec);
+                panic!("Invalid hand");
+            },
+        }
+    }
 
-        let n_chars = char_occurances.keys().len();
-        match n_chars {
-            1 => HandType::FiveOfAKind(input.clone()),
-            2 => {
-                if *char_occurances.values().max().unwrap() == 4 {
-                    HandType::FourOfAKind(input.clone())
-                } else if *char_occurances.values().min().unwrap() == 2 {
-                    HandType::FullHouse(input.clone())
-                } else {
-                    HandType::ThreeOfAKind(input.clone())
-                }
-            }
-            3 => {
-                if *char_occurances.values().max().unwrap() == 3 {
-                    HandType::ThreeOfAKind(input.clone())
-                } else {
-                    HandType::TwoPair(input.clone())
-                }
-            }
-            4 => HandType::OnePair(input.clone()),
-            5 => HandType::HighCard(input.clone()),
-            _ => panic!("Invalid hand"),
+    pub fn ranking(&self) -> usize {
+        match self {
+            HandType::FiveOfAKind(_) => 7,
+            HandType::FourOfAKind(_) => 6,
+            HandType::FullHouse(_) => 5,
+            HandType::ThreeOfAKind(_) => 4,
+            HandType::TwoPair(_) => 3,
+            HandType::OnePair(_) => 2,
+            HandType::HighCard(_) => 1,
+        }
+    }
+
+    pub fn cards(&self) -> &String {
+        match self {
+            HandType::FiveOfAKind(cards) => cards,
+            HandType::FourOfAKind(cards) => cards,
+            HandType::FullHouse(cards) => cards,
+            HandType::ThreeOfAKind(cards) => cards,
+            HandType::TwoPair(cards) => cards,
+            HandType::OnePair(cards) => cards,
+            HandType::HighCard(cards) => cards, 
         }
     }
 }
@@ -64,40 +81,9 @@ impl PartialOrd for HandType {
 
 impl Ord for HandType {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match (self, other) {
-            (HandType::FiveOfAKind(this_str), HandType::FiveOfAKind(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::FiveOfAKind(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::FiveOfAKind(_)) => std::cmp::Ordering::Less,
-            (HandType::FourOfAKind(this_str), HandType::FourOfAKind(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::FourOfAKind(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::FourOfAKind(_)) => std::cmp::Ordering::Less,
-            (HandType::FullHouse(this_str), HandType::FullHouse(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::FullHouse(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::FullHouse(_)) => std::cmp::Ordering::Less,
-            (HandType::ThreeOfAKind(this_str), HandType::ThreeOfAKind(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::ThreeOfAKind(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::ThreeOfAKind(_)) => std::cmp::Ordering::Less,
-            (HandType::TwoPair(this_str), HandType::TwoPair(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::TwoPair(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::TwoPair(_)) => std::cmp::Ordering::Less,
-            (HandType::OnePair(this_str), HandType::OnePair(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
-            (HandType::OnePair(_), _) => std::cmp::Ordering::Greater,
-            (_, HandType::OnePair(_)) => std::cmp::Ordering::Less,
-            (HandType::HighCard(this_str), HandType::HighCard(other_str)) => {
-                compare_cards(&this_str, other_str)
-            }
+        match self.ranking().cmp(&other.ranking()) {
+            Ordering::Equal => compare_cards(&self.cards(), &other.cards()),
+            other => other,
         }
     }
 }
@@ -133,33 +119,23 @@ pub fn compare_cards(hand1: &String, hand2: &String) -> std::cmp::Ordering {
         .collect();
 
     if out.len() == 0 {
-        Ordering::Greater
+        Ordering::Equal
     } else {
         out[0]
     }
 }
 
-pub fn optimise_next_joker(hand: &String, start: usize) -> String {
-    let joker_index = hand.chars().skip(start).position(|c| c == 'J');
-    let mut best = hand.clone();
-    match joker_index {
-        Some(index) => {
-            for c in CHAR_ORDER.chars() {
-                let mut new_hand = hand.clone();
-                new_hand
-                .replace_range(start+index..start+index + 1, &c.to_string());
-                new_hand = optimise_next_joker(&new_hand, start+index + 1);              
-
-                if HandType::parse(&new_hand) > HandType::parse(&best) {
-                    best = new_hand;
-                }
-            }
-        }
-        None => {},
-    };
-    best
+pub fn optimise_next_joker(hand: &String) -> String {
+    if hand.contains("J") {
+        "23456789TQKA".chars().map(|c| {
+            HandType::parse(&optimise_next_joker(&hand.replacen("J", &c.to_string(), 1)))
+        })
+        .max().unwrap().cards().clone()
+    } else {
+        hand.clone()
+    }
 }
- 
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -174,9 +150,7 @@ mod tests {
                 (String::from(segs[0]), bid)
             })
             .unzip();
-        
         let hand_types: Vec<HandType> = hands.iter().map(HandType::parse).collect();
-
         let ranks = rank(&hand_types);
         let winnings: u64 = bids
             .into_iter()
@@ -198,7 +172,9 @@ mod tests {
                 (String::from(segs[0]), bid)
             })
             .unzip();
-        let opt_hands = hands.iter().map(|hand| optimise_next_joker(hand, 0)).collect::<Vec<String>>();
+        let mut opt_hands = hands.iter().map(|hand| optimise_next_joker(hand)).collect::<Vec<String>>();
+        opt_hands.sort();
+        println!("{:?}", opt_hands);
         let hand_types: Vec<HandType> = opt_hands.iter().map(HandType::parse).collect();
         let ranks = rank(&hand_types);
         let winnings: u64 = bids
@@ -207,6 +183,6 @@ mod tests {
             .map(|(bid, rank)| bid * *rank as u64)
             .sum();
         
-        assert_eq!(winnings, 5);
+        assert_eq!(winnings, 0);
     }
 }
