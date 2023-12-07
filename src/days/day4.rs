@@ -89,8 +89,9 @@ mod tests {
                     card_copies[start + offset + 1] += card_copies[start]
                 }
                 card_copies[start]
-            }).collect();
-        
+            })
+            .collect();
+
         assert_eq!(total_cards.iter().sum::<usize>(), 6050769);
     }
 }

@@ -33,7 +33,7 @@ impl Range {
     }
 
     pub fn contains(&self, val: i64) -> bool {
-        self.src_start < val  && val < self.src_start + self.length
+        self.src_start < val && val < self.src_start + self.length
     }
 }
 
@@ -151,14 +151,15 @@ mod tests {
     #[test]
     #[ignore = "long running test"]
     fn day5_part2() {
-
         let (seeds, maps) =
             parse_input(Path::new("data/day5/data.txt")).expect("Unable to parse input. ");
         let seed_ranges: Vec<Range> = seeds
             .chunks(2)
             .into_iter()
-            .map(|range| {
-                Range { src_start: range[0] as i64, dest_start: 0, length: range[1] as i64 }
+            .map(|range| Range {
+                src_start: range[0] as i64,
+                dest_start: 0,
+                length: range[1] as i64,
             })
             .collect();
         let map_map: HashMap<_, _> = maps
@@ -174,7 +175,7 @@ mod tests {
                     .iter()
                     .rev()
                     .fold(dest_test, |acc, map_key| map_map[*map_key].rev_map(acc));
-                let maps_to_seed_range = seed_ranges 
+                let maps_to_seed_range = seed_ranges
                     .iter()
                     .map(|range| range.contains(res as i64))
                     .any(|in_range| in_range);
