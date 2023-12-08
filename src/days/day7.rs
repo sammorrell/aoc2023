@@ -71,6 +71,18 @@ impl HandType {
             HandType::HighCard(cards) => cards, 
         }
     }
+
+    pub fn set_cards(&mut self, input_cards: &String) {
+        match self {
+            HandType::FiveOfAKind(cards) => *cards = input_cards.clone(),
+            HandType::FourOfAKind(cards) => *cards = input_cards.clone(),
+            HandType::FullHouse(cards) => *cards = input_cards.clone(),
+            HandType::ThreeOfAKind(cards) => *cards = input_cards.clone(),
+            HandType::TwoPair(cards) => *cards = input_cards.clone(),
+            HandType::OnePair(cards) => *cards = input_cards.clone(),
+            HandType::HighCard(cards) => *cards = input_cards.clone(), 
+        }
+    }
 }
 
 impl PartialOrd for HandType {
@@ -125,14 +137,23 @@ pub fn compare_cards(hand1: &String, hand2: &String) -> std::cmp::Ordering {
     }
 }
 
-pub fn optimise_next_joker(hand: &String) -> String {
-    if hand.contains("J") {
-        "23456789TQKA".chars().map(|c| {
-            HandType::parse(&optimise_next_joker(&hand.replacen("J", &c.to_string(), 1)))
-        })
-        .max().unwrap().cards().clone()
-    } else {
-        hand.clone()
+pub fn optimise_next_joker(hand: &String) -> HandType {
+    let mut char_occurances: HashMap<char, u64> = HashMap::new();
+    for character in hand.chars() {
+        char_occurances.insert(character, char_occurances.get(&character).unwrap_or(&0) + 1);
+    }
+    
+    // This isn't nice, but it works for parts 2. 
+    // This took me so long to fix - I should have read the instructions more carefully. 
+    // Also, should not have over engineered the solution.
+    char_occurances.remove(&'J');
+    match char_occurances.iter().max_by_key(|entry | entry.1) {
+        Some((c, _)) => {
+            let mut optim_hand = HandType::parse(&hand.replace("J", &c.to_string()));
+            optim_hand.set_cards(hand);
+            optim_hand
+        },
+        None => HandType::FiveOfAKind("JJJJJ".to_string()),
     }
 }
 
@@ -162,7 +183,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "Not working yet"]
+    #[ignore = "You need to change the CHAR_ORDER to CHAR_ORDER_PT2 to run this test"]
     fn day7_part2() {
         let (hands, bids): (Vec<String>, Vec<u64>) = INPUT
             .split("\n")
@@ -172,17 +193,14 @@ mod tests {
                 (String::from(segs[0]), bid)
             })
             .unzip();
-        let mut opt_hands = hands.iter().map(|hand| optimise_next_joker(hand)).collect::<Vec<String>>();
-        opt_hands.sort();
-        println!("{:?}", opt_hands);
-        let hand_types: Vec<HandType> = opt_hands.iter().map(HandType::parse).collect();
-        let ranks = rank(&hand_types);
+        let opt_hands = hands.iter().map(|hand| optimise_next_joker(hand)).collect::<Vec<HandType>>();
+        let ranks = rank(&opt_hands);
         let winnings: u64 = bids
             .into_iter()
             .zip(&ranks)
             .map(|(bid, rank)| bid * *rank as u64)
             .sum();
         
-        assert_eq!(winnings, 0);
+        assert_eq!(winnings, 246894760);
     }
 }
