@@ -1,7 +1,6 @@
 use std::{cmp::Ordering, collections::HashMap};
 
 const INPUT: &str = include_str!("../../data/day7/data.txt");
-const TEST_INTPUT: &str = include_str!("../../data/day7/reddit.txt");
 
 const CHAR_ORDER: &str = "23456789TJQKA";
 const CHAR_ORDER_PT2: &str = "J23456789TQKA";
