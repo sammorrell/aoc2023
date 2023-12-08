@@ -21,3 +21,6 @@ Cargo.lock
 
 # Ignore the code workspace.
 *.code-workspace
+
+# Remove the data folder
+data/
