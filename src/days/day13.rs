@@ -24,9 +24,9 @@ pub fn find_reflect_col(pattern: &Vec<String>, allowed_col_diff: usize) -> Optio
         cols_left
             .iter()
             .zip(cols_right.iter())
-            .all(|(left, right)| {
-                left.iter().zip(right.iter()).filter(|(l, r)| l != r).count() <= allowed_col_diff
-            })
+            .map(|(left, right)| {
+                left.iter().zip(right.iter()).filter(|(l, r)| l != r).count()
+            }).sum::<usize>() == allowed_col_diff
     })
 }
 
@@ -50,9 +50,9 @@ pub fn find_reflect_row(pattern: &Vec<String>, allowed_row_diff: usize) -> Optio
         rows_above
             .iter()
             .zip(rows_below.iter())
-            .all(|(above, below)| {
-                above.chars().zip(below.chars()).filter(|(l, r)| l != r).count() <= allowed_row_diff
-            })
+            .map(|(above, below)| {
+                above.chars().zip(below.chars()).filter(|(l, r)| l != r).count()
+            }).sum::<usize>() == allowed_row_diff
     })
 }
 
@@ -83,5 +83,30 @@ mod tests {
             .collect();
 
         assert_eq!(res.iter().sum::<usize>(), 31739);
+    }
+
+    #[test]
+    fn day13_part2() {
+        let patterns = aoctk::io::read_text_chunks(Path::new("data/day13/input.txt"))
+            .expect("Invalid input. ");
+
+        let res: Vec<usize> = patterns
+            .iter()
+            .map(|pat| {
+                let col = match find_reflect_col(pat, 1) {
+                    Some(col) => col,
+                    None => 0,
+                };
+                let row = match find_reflect_row(pat, 1) {
+                    Some(row) => row,
+                    None => 0,
+                };
+
+                println!("col: {}, row: {}", col, row);
+                col + 100 * row
+            })
+            .collect();
+
+        assert_eq!(res.iter().sum::<usize>(), 31539);
     }
 }
