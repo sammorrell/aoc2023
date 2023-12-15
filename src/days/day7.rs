@@ -29,7 +29,7 @@ impl HandType {
         for character in input.chars() {
             char_occurances.insert(character, char_occurances.get(&character).unwrap_or(&0) + 1);
         }
-        
+
         let mut char_occurances_vec = char_occurances.values().collect::<Vec<&u64>>();
         char_occurances_vec.sort();
         match char_occurances_vec.as_slice() {
@@ -40,10 +40,10 @@ impl HandType {
             [2, 3] => HandType::FullHouse(input.clone()),
             [1, 4] => HandType::FourOfAKind(input.clone()),
             [5] => HandType::FiveOfAKind(input.clone()),
-            _ => { 
+            _ => {
                 println!("{:?}", char_occurances_vec);
                 panic!("Invalid hand");
-            },
+            }
         }
     }
 
@@ -67,7 +67,7 @@ impl HandType {
             HandType::ThreeOfAKind(cards) => cards,
             HandType::TwoPair(cards) => cards,
             HandType::OnePair(cards) => cards,
-            HandType::HighCard(cards) => cards, 
+            HandType::HighCard(cards) => cards,
         }
     }
 
@@ -79,7 +79,7 @@ impl HandType {
             HandType::ThreeOfAKind(cards) => *cards = input_cards.clone(),
             HandType::TwoPair(cards) => *cards = input_cards.clone(),
             HandType::OnePair(cards) => *cards = input_cards.clone(),
-            HandType::HighCard(cards) => *cards = input_cards.clone(), 
+            HandType::HighCard(cards) => *cards = input_cards.clone(),
         }
     }
 }
@@ -141,17 +141,17 @@ pub fn optimise_next_joker(hand: &String) -> HandType {
     for character in hand.chars() {
         char_occurances.insert(character, char_occurances.get(&character).unwrap_or(&0) + 1);
     }
-    
-    // This isn't nice, but it works for parts 2. 
-    // This took me so long to fix - I should have read the instructions more carefully. 
+
+    // This isn't nice, but it works for parts 2.
+    // This took me so long to fix - I should have read the instructions more carefully.
     // Also, should not have over engineered the solution.
     char_occurances.remove(&'J');
-    match char_occurances.iter().max_by_key(|entry | entry.1) {
+    match char_occurances.iter().max_by_key(|entry| entry.1) {
         Some((c, _)) => {
             let mut optim_hand = HandType::parse(&hand.replace("J", &c.to_string()));
             optim_hand.set_cards(hand);
             optim_hand
-        },
+        }
         None => HandType::FiveOfAKind("JJJJJ".to_string()),
     }
 }
@@ -192,14 +192,17 @@ mod tests {
                 (String::from(segs[0]), bid)
             })
             .unzip();
-        let opt_hands = hands.iter().map(|hand| optimise_next_joker(hand)).collect::<Vec<HandType>>();
+        let opt_hands = hands
+            .iter()
+            .map(|hand| optimise_next_joker(hand))
+            .collect::<Vec<HandType>>();
         let ranks = rank(&opt_hands);
         let winnings: u64 = bids
             .into_iter()
             .zip(&ranks)
             .map(|(bid, rank)| bid * *rank as u64)
             .sum();
-        
+
         assert_eq!(winnings, 246894760);
     }
 }

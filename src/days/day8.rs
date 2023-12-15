@@ -1,7 +1,7 @@
-use std::path::Path;
-use regex::Regex;
-use rayon::prelude::*;
 use num::integer::lcm;
+use rayon::prelude::*;
+use regex::Regex;
+use std::path::Path;
 
 const INPUT: &str = include_str!("../../data/day8/data.txt");
 
@@ -16,9 +16,7 @@ pub fn parse_input() -> (String, Vec<String>, Vec<(String, String)>) {
     let nodes = input_str
         .lines()
         .skip(2)
-        .map(|line| {
-            line.split(" = ").next().unwrap().to_string()
-        })
+        .map(|line| line.split(" = ").next().unwrap().to_string())
         .collect();
     let match_patter = Regex::new(r"[ ]*([0-9A-Z]+), ([0-9A-Z]+)\)[ ]*").unwrap();
     let edges = input_str
@@ -32,7 +30,10 @@ pub fn parse_input() -> (String, Vec<String>, Vec<(String, String)>) {
     (instructions, nodes, edges)
 }
 
-pub fn match_edges_to_nodes(nodes: &Vec<String>, edges: &Vec<(String, String)>) -> Vec<(usize, usize)> {
+pub fn match_edges_to_nodes(
+    nodes: &Vec<String>,
+    edges: &Vec<(String, String)>,
+) -> Vec<(usize, usize)> {
     edges
         .iter()
         .map(|(left, right)| {
@@ -44,7 +45,7 @@ pub fn match_edges_to_nodes(nodes: &Vec<String>, edges: &Vec<(String, String)>) 
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
@@ -60,7 +61,7 @@ mod tests{
             pos = match instruction {
                 'L' => matched_edges[pos].0,
                 'R' => matched_edges[pos].1,
-                _ => panic!("Unknown direction")
+                _ => panic!("Unknown direction"),
             };
             i += 1;
         }
@@ -95,17 +96,15 @@ mod tests{
                     pos = match instruction {
                         'L' => matched_edges[pos].0,
                         'R' => matched_edges[pos].1,
-                        _ => panic!("Unknown direction")
+                        _ => panic!("Unknown direction"),
                     };
                     i += 1;
                 }
                 i
-            }).collect();
-        
-        let min_dist = distances
-            .iter()
-            .fold(1, |accum, dist| lcm(accum, *dist));
+            })
+            .collect();
 
+        let min_dist = distances.iter().fold(1, |accum, dist| lcm(accum, *dist));
 
         assert_eq!(min_dist, 10151663816849);
     }

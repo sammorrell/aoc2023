@@ -25,8 +25,13 @@ pub fn find_reflect_col(pattern: &Vec<String>, allowed_col_diff: usize) -> Optio
             .iter()
             .zip(cols_right.iter())
             .map(|(left, right)| {
-                left.iter().zip(right.iter()).filter(|(l, r)| l != r).count()
-            }).sum::<usize>() == allowed_col_diff
+                left.iter()
+                    .zip(right.iter())
+                    .filter(|(l, r)| l != r)
+                    .count()
+            })
+            .sum::<usize>()
+            == allowed_col_diff
     })
 }
 
@@ -51,8 +56,14 @@ pub fn find_reflect_row(pattern: &Vec<String>, allowed_row_diff: usize) -> Optio
             .iter()
             .zip(rows_below.iter())
             .map(|(above, below)| {
-                above.chars().zip(below.chars()).filter(|(l, r)| l != r).count()
-            }).sum::<usize>() == allowed_row_diff
+                above
+                    .chars()
+                    .zip(below.chars())
+                    .filter(|(l, r)| l != r)
+                    .count()
+            })
+            .sum::<usize>()
+            == allowed_row_diff
     })
 }
 

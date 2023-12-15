@@ -1,21 +1,25 @@
 use itertools::Itertools;
-use regex::Regex;
 use memoize::memoize;
+use regex::Regex;
 
 const BROKEN_SEPARATOR: &str = "[.]+";
 
 pub fn parse_input(input: &str) -> (Vec<String>, Vec<Vec<usize>>) {
     let lines = input.lines().collect_vec();
     lines
-    .iter()
-    .map(|line| {
-        let segs: (&str, &str) = line.split_once(" ").unwrap();
-        let broken_map = segs.0.to_string();
-        let broken_pattern: Vec<usize> = segs.1.split(",").map(|s| s.parse::<usize>().unwrap()).collect();
+        .iter()
+        .map(|line| {
+            let segs: (&str, &str) = line.split_once(" ").unwrap();
+            let broken_map = segs.0.to_string();
+            let broken_pattern: Vec<usize> = segs
+                .1
+                .split(",")
+                .map(|s| s.parse::<usize>().unwrap())
+                .collect();
 
-        (broken_map, broken_pattern)
-    })
-    .unzip()
+            (broken_map, broken_pattern)
+        })
+        .unzip()
 }
 
 pub fn is_valid_row(row: &str, broken_pattern: &Vec<usize>) -> bool {
@@ -32,18 +36,19 @@ pub fn is_valid_row(row: &str, broken_pattern: &Vec<usize>) -> bool {
 }
 
 /// This is the brute-force approach that I originally solves part 1 with.
-/// This would not scale to part 2. 
+/// This would not scale to part 2.
 #[memoize]
 fn count_valid_combinations(row: String, broken_pattern: Vec<usize>) -> usize {
     let unknown_posns = row.match_indices("?").collect_vec();
     if unknown_posns.len() > 0 {
         let pos = unknown_posns.first().unwrap().0;
         let mut working_test = row.to_string();
-        working_test.replace_range(pos..pos+1, ".");
+        working_test.replace_range(pos..pos + 1, ".");
         let mut broken_test = row.to_string();
-        broken_test.replace_range(pos..pos+1, "#");
+        broken_test.replace_range(pos..pos + 1, "#");
 
-        count_valid_combinations(working_test, broken_pattern.clone()) + count_valid_combinations(broken_test, broken_pattern.clone())
+        count_valid_combinations(working_test, broken_pattern.clone())
+            + count_valid_combinations(broken_test, broken_pattern.clone())
     } else {
         if is_valid_row(&row, &broken_pattern) {
             1
@@ -54,19 +59,19 @@ fn count_valid_combinations(row: String, broken_pattern: Vec<usize>) -> usize {
 }
 
 /// Thanks to https://www.youtube.com/watch?v=g3Ms5e7Jdqo for explaining
-/// this solution. Nice little logic puzzle. 
+/// this solution. Nice little logic puzzle.
 #[memoize]
 fn count_combinations(row: String, pattern: Vec<usize>) -> usize {
     if row.chars().count() == 0 {
-        // If we have reached the end of the row, 
+        // If we have reached the end of the row,
         // and we still have numbers to match, then it is not a valid combination.
-        return if pattern.len() == 0 { 1 } else { 0 }
+        return if pattern.len() == 0 { 1 } else { 0 };
     }
-    
+
     if pattern.len() == 0 {
-        // If after all of the numbers we are left with any non-matched, 
-        // then it is not a valid combination. 
-        return if row.contains("#") { 0 } else { 1 }
+        // If after all of the numbers we are left with any non-matched,
+        // then it is not a valid combination.
+        return if row.contains("#") { 0 } else { 1 };
     }
 
     let mut count = 0;
@@ -75,11 +80,14 @@ fn count_combinations(row: String, pattern: Vec<usize>) -> usize {
     }
 
     if "#?".contains(row.chars().nth(0).unwrap()) {
-        if pattern[0] <= row.chars().count() && 
-            row.chars().take(pattern[0]).all(|c| c != '.') &&
-            (pattern[0] == row.chars().count() || row.chars().nth(pattern[0]).unwrap() != '#') 
+        if pattern[0] <= row.chars().count()
+            && row.chars().take(pattern[0]).all(|c| c != '.')
+            && (pattern[0] == row.chars().count() || row.chars().nth(pattern[0]).unwrap() != '#')
         {
-            count += count_combinations(row.chars().skip(pattern[0] + 1).collect(), pattern[1..].to_vec());
+            count += count_combinations(
+                row.chars().skip(pattern[0] + 1).collect(),
+                pattern[1..].to_vec(),
+            );
         }
     }
     count
@@ -89,7 +97,6 @@ fn count_combinations(row: String, pattern: Vec<usize>) -> usize {
 mod tests {
     use super::*;
     use rayon::prelude::*;
-
 
     const INPUT: &str = include_str!("../../data/day12/input.txt");
 
@@ -119,14 +126,13 @@ mod tests {
             .collect();
 
         assert_eq!(count.iter().sum::<usize>(), 850504257483930);
-
     }
 
     #[test]
     fn test_is_valid_row() {
-        assert!(is_valid_row("#.#.###", &vec![1,1,3]));
-        assert!(!is_valid_row("##..###", &vec![1,1,3]));
+        assert!(is_valid_row("#.#.###", &vec![1, 1, 3]));
+        assert!(!is_valid_row("##..###", &vec![1, 1, 3]));
 
-        assert!(is_valid_row("#....######..#####.", &vec![1,6,5]));
+        assert!(is_valid_row("#....######..#####.", &vec![1, 6, 5]));
     }
 }

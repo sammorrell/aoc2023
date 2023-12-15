@@ -40,11 +40,8 @@ mod tests {
                     .collect::<Vec<i64>>()
             })
             .collect::<Vec<Vec<i64>>>();
-        
-        let extrap_sum: i64 = measurements
-            .iter()
-            .map(extrapolate_next)
-            .sum();
+
+        let extrap_sum: i64 = measurements.iter().map(extrapolate_next).sum();
 
         assert_eq!(extrap_sum, 1806615041);
     }
@@ -59,11 +56,8 @@ mod tests {
                     .collect::<Vec<i64>>()
             })
             .collect::<Vec<Vec<i64>>>();
-        
-        let extrap_sum: i64 = measurements
-            .iter()
-            .map(extrapolate_prev)
-            .sum();
+
+        let extrap_sum: i64 = measurements.iter().map(extrapolate_prev).sum();
 
         assert_eq!(extrap_sum, 1211);
     }
