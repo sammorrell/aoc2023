@@ -72,6 +72,13 @@ fn get_tile_visits(grid: &Vec<Vec<char>>, in_beam: Beam) -> Vec<Vec<usize>> {
     energy
 }
 
+fn count_energised_tiles(energy: &Vec<Vec<usize>>) -> usize {
+    energy
+        .iter()
+        .map(|r| r.iter().filter(|val| **val > 0).count())
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -84,11 +91,68 @@ mod tests {
         let beam = Beam::new();
         let energy = get_tile_visits(&grid, beam);
 
-        let energised_tiles: usize = energy
-            .iter()
-            .map(|r| r.iter().filter(|val| **val > 0).count())
-            .sum();
+        let energised_tiles = count_energised_tiles(&energy);
 
         assert_eq!(energised_tiles, 7562);
+    }
+
+    #[test]
+    fn day16_part2() {
+        let grid = aoctk::io::grid_from_file(Path::new("data/day16/input.txt"))
+            .expect("Unable to find grid file.");
+        let ni = grid.len();
+        let nj = grid[0].len();
+
+        let north_max = (0..nj)
+            .map(|j| {
+                let mut beam = Beam::new();
+                beam.pos = (0, j as i32);
+                beam.dir = (-1, 0);
+                let energy = get_tile_visits(&grid, beam);
+                count_energised_tiles(&energy)
+            })
+            .max()
+            .unwrap();
+
+        let east_max = (0..ni)
+            .map(|i| {
+                let mut beam = Beam::new();
+                beam.pos = (i as i32, nj as i32 - 1);
+                beam.dir = (0, -1);
+                let energy = get_tile_visits(&grid, beam);
+                count_energised_tiles(&energy)
+            })
+            .max()
+            .unwrap();
+
+        let south_max = (0..nj)
+            .map(|j| {
+                let mut beam = Beam::new();
+                beam.pos = (ni as i32 - 1, j as i32);
+                beam.dir = (0, -1);
+                let energy = get_tile_visits(&grid, beam);
+                count_energised_tiles(&energy)
+            })
+            .max()
+            .unwrap();
+
+        let west_max = (0..ni)
+            .map(|j| {
+                let mut beam = Beam::new();
+                beam.pos = (ni as i32 - 1, 0);
+                beam.dir = (0, 1);
+                let energy = get_tile_visits(&grid, beam);
+                count_energised_tiles(&energy)
+            })
+            .max()
+            .unwrap();
+
+        assert_eq!(
+            *vec![north_max, east_max, south_max, west_max]
+                .iter()
+                .max()
+                .unwrap(),
+            7562
+        );
     }
 }
