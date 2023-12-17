@@ -27,11 +27,11 @@ impl PartialOrd for State {
 #[cfg(test)]
 mod tests {
 
-    use std::{
-        path::Path,
-        collections::{BinaryHeap, HashSet},
-    };
     use super::*;
+    use std::{
+        collections::{BinaryHeap, HashSet},
+        path::Path,
+    };
 
     #[test]
     fn day17_part1() {
@@ -39,11 +39,20 @@ mod tests {
             .expect("Unable to find grid file.");
         let grid: Vec<Vec<usize>> = grid
             .iter()
-            .map(|row| row.iter().map(|val| val.to_string().parse::<usize>().unwrap() ).collect())
+            .map(|row| {
+                row.iter()
+                    .map(|val| val.to_string().parse::<usize>().unwrap())
+                    .collect()
+            })
             .collect();
 
-        let target = (grid.len() as i32 - 1 , grid[0].len() as i32 - 1);
-        let mut states = BinaryHeap::from(vec![State{ hl: 0, pos: (0, 0), dir: (0, 0), dir_steps: 0 }]);
+        let target = (grid.len() as i32 - 1, grid[0].len() as i32 - 1);
+        let mut states = BinaryHeap::from(vec![State {
+            hl: 0,
+            pos: (0, 0),
+            dir: (0, 0),
+            dir_steps: 0,
+        }]);
         let mut seen_states = HashSet::new();
         let mut hl = 0;
 
@@ -54,7 +63,9 @@ mod tests {
                 break;
             }
 
-            if seen_states.contains(&curr.summary()) { continue; }
+            if seen_states.contains(&curr.summary()) {
+                continue;
+            }
 
             seen_states.insert(curr.summary());
 
@@ -63,10 +74,10 @@ mod tests {
                 next.pos.0 = curr.pos.0 + curr.dir.0;
                 next.pos.1 = curr.pos.1 + curr.dir.1;
                 next.dir_steps += 1;
-                if next.pos.0 >= 0 
-                        && next.pos.1 >= 0
-                        && next.pos.0 < grid.len() as i32 
-                        && next.pos.1 < grid[0].len() as i32
+                if next.pos.0 >= 0
+                    && next.pos.1 >= 0
+                    && next.pos.0 < grid.len() as i32
+                    && next.pos.1 < grid[0].len() as i32
                 {
                     next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
                     states.push(next);
@@ -81,13 +92,13 @@ mod tests {
                     next.pos.1 = next.pos.1 + next.dir.1;
                     next.dir_steps = 1;
 
-                    if next.pos.0 >= 0 
+                    if next.pos.0 >= 0
                         && next.pos.1 >= 0
-                        && next.pos.0 < grid.len() as i32 
+                        && next.pos.0 < grid.len() as i32
                         && next.pos.1 < grid[0].len() as i32
-                        {
-                            next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
-                            states.push(next);
+                    {
+                        next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
+                        states.push(next);
                     }
                 }
             }
@@ -102,11 +113,20 @@ mod tests {
             .expect("Unable to find grid file.");
         let grid: Vec<Vec<usize>> = grid
             .iter()
-            .map(|row| row.iter().map(|val| val.to_string().parse::<usize>().unwrap() ).collect())
+            .map(|row| {
+                row.iter()
+                    .map(|val| val.to_string().parse::<usize>().unwrap())
+                    .collect()
+            })
             .collect();
 
-        let target = (grid.len() as i32 - 1 , grid[0].len() as i32 - 1);
-        let mut states = BinaryHeap::from(vec![State{ hl: 0, pos: (0, 0), dir: (0, 0), dir_steps: 0 }]);
+        let target = (grid.len() as i32 - 1, grid[0].len() as i32 - 1);
+        let mut states = BinaryHeap::from(vec![State {
+            hl: 0,
+            pos: (0, 0),
+            dir: (0, 0),
+            dir_steps: 0,
+        }]);
         let mut seen_states = HashSet::new();
         let mut hl = 0;
 
@@ -117,7 +137,9 @@ mod tests {
                 break;
             }
 
-            if seen_states.contains(&curr.summary()) { continue; }
+            if seen_states.contains(&curr.summary()) {
+                continue;
+            }
 
             seen_states.insert(curr.summary());
 
@@ -126,10 +148,10 @@ mod tests {
                 next.pos.0 = curr.pos.0 + curr.dir.0;
                 next.pos.1 = curr.pos.1 + curr.dir.1;
                 next.dir_steps += 1;
-                if next.pos.0 >= 0 
-                        && next.pos.1 >= 0
-                        && next.pos.0 < grid.len() as i32 
-                        && next.pos.1 < grid[0].len() as i32
+                if next.pos.0 >= 0
+                    && next.pos.1 >= 0
+                    && next.pos.0 < grid.len() as i32
+                    && next.pos.1 < grid[0].len() as i32
                 {
                     next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
                     states.push(next);
@@ -144,14 +166,14 @@ mod tests {
                         next.pos.0 = next.pos.0 + next.dir.0;
                         next.pos.1 = next.pos.1 + next.dir.1;
                         next.dir_steps = 1;
-    
-                        if next.pos.0 >= 0 
+
+                        if next.pos.0 >= 0
                             && next.pos.1 >= 0
-                            && next.pos.0 < grid.len() as i32 
+                            && next.pos.0 < grid.len() as i32
                             && next.pos.1 < grid[0].len() as i32
-                            {
-                                next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
-                                states.push(next);
+                        {
+                            next.hl += grid[next.pos.0 as usize][next.pos.1 as usize];
+                            states.push(next);
                         }
                     }
                 }
