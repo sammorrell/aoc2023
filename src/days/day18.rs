@@ -1,6 +1,7 @@
 #[cfg(test)]
 pub fn parse_instruction(instruction: &str) -> (i64, char) {
-    let steps = i64::from_str_radix(&instruction.chars().skip(2).take(5).collect::<String>(), 16).unwrap();
+    let steps =
+        i64::from_str_radix(&instruction.chars().skip(2).take(5).collect::<String>(), 16).unwrap();
     let dirchar = match instruction.chars().rev().skip(1).next().unwrap() {
         '0' => 'R',
         '1' => 'D',
@@ -43,18 +44,19 @@ mod tests {
             .collect();
         verts.append(&mut other_verts);
 
-        // Now shoelace the vertices to find the interior area. 
+        // Now shoelace the vertices to find the interior area.
         let area = verts
             .windows(2)
             .map(|points| {
                 println!("{:?}", points);
                 points[0].0 * points[1].1 - points[1].0 * points[0].1
             })
-            .sum::<i64>() / 2;
+            .sum::<i64>()
+            / 2;
 
         // Fix the missing parts of the area using Pick's Theorem.
         let i = area.abs() - boundary_len / 2 + 1;
-        
+
         assert_eq!(boundary_len + i, 46334);
     }
 
@@ -84,19 +86,19 @@ mod tests {
             .collect();
         verts.append(&mut other_verts);
 
-        // Now shoelace the vertices to find the interior area. 
+        // Now shoelace the vertices to find the interior area.
         let area = verts
             .windows(2)
             .map(|points| {
                 println!("{:?}", points);
                 points[0].0 * points[1].1 - points[1].0 * points[0].1
             })
-            .sum::<i64>() / 2;
+            .sum::<i64>()
+            / 2;
 
         // Fix the missing parts of the area using Pick's Theorem.
         let i = area.abs() - boundary_len / 2 + 1;
-        
+
         assert_eq!(boundary_len + i, 102000662718092);
     }
-
 }
