@@ -1,4 +1,7 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    collections::VecDeque,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Brick {
@@ -87,6 +90,8 @@ pub fn find_supported_bricks(brick: &Brick, bricks: &Vec<RefCell<Brick>>) -> Vec
 #[cfg(test)]
 mod tests {
 
+    use std::collections::{HashSet, hash_map::RandomState};
+
     use super::*;
 
     const INPUT: &str = include_str!("../../data/day22/input.txt");
@@ -119,4 +124,56 @@ mod tests {
 
         assert_eq!(count, 401);
     }
+
+    #[test]
+    fn day22_part2() {
+        let bricks: Vec<RefCell<Brick>> = INPUT.lines().map(|line| RefCell::new(Brick::parse(line))).collect();
+        let bricks = fall(bricks);
+
+        // Check the bricks that support
+        let (supporting_bricks, supported_bricks): (Vec<Vec<usize>>, Vec<Vec<usize>>) = bricks
+        .iter()
+        .map(|b| {
+            (find_supporting_bricks(&b.borrow().clone(), &bricks), find_supported_bricks(&b.borrow().clone(), &bricks))
+        })
+        .unzip();
+        
+        // Now we must loop through all of the bricks, checking which will fall
+        // if the current is disintegrated using a BFS. 
+        let mut total = 0;
+        for start_idx in 0..supported_bricks.len() {   
+            // First, build up a queue of the supported bricks, which are only 
+            // supported by this single brick.          
+            let mut q: VecDeque<_> = supported_bricks[start_idx]
+                .iter()
+                .filter(|idx| {
+                    supporting_bricks[**idx].len() == 1
+                })
+                .collect();
+            let mut falling_bricks: HashSet<usize, RandomState> = HashSet::from_iter(q.clone().iter().map(|e| **e));
+            falling_bricks.insert(start_idx);
+            
+            while let Some(curr_brick) = q.pop_front() {
+                // Get the bricks that are supported by this brick, and check that
+                // they are not already falling. 
+                for b in supported_bricks[*curr_brick].iter() {
+                    if !falling_bricks.contains(b) {
+                        // Now check to see whether all supporting bricks are also falling. 
+                        // By virtue of working upwards from the start bricks with a queue, 
+                        // all other bricks below should already be in the set if they are to fall. 
+                        if supporting_bricks[*b].iter().all(|ib| falling_bricks.contains(ib)) {
+                            q.push_back(b);
+                            falling_bricks.insert(*b);
+                        }
+                    }
+
+                }
+            }
+
+            // Remember that we need to negate the original disintegrated brick from this total. 
+            total += falling_bricks.len() as i64 - 1;
+        }
+        assert_eq!(total, 63491);
+    }
+
 }
